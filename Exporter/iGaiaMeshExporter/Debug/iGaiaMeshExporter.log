@@ -1,19 +1,25 @@
-﻿Build started 7/25/2013 11:45:12 PM.
+﻿Build started 8/7/2013 9:21:38 PM.
      1>Project "D:\Develop\iGaia-Mesh-Exporter-3d-Max\Exporter\iGaiaMeshExporter\iGaiaMeshExporter.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /I.\midl\Win32 /I"C:\Program Files\Autodesk\3ds Max 9 SDK\maxsdk\include" /I"C:\Program Files (x86)\Autodesk\3ds Max 9 SDK\maxsdk\include" /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _USRDLL /D _CRT_SECURE_NO_DEPRECATE /D _CRT_NONSTDC_NO_DEPRECATE /D _SCL_SECURE_NO_DEPRECATE /D ISOLATION_AWARE_ENABLED=1 /D _WINDLL /Gm- /EHa /RTC1 /MDd /GS /arch:SSE /fp:fast /Zc:wchar_t /Zc:forScope /Fo".\Debug\\" /Fd"C:\Program Files (x86)\Autodesk\3ds Max 9\plugins\iGaiaMeshExporter.dle.pdb" /Gd /TP /analyze- /FC /errorReport:prompt iGaiaMeshExporter.cpp
-         iGaiaMeshExporter.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /I.\midl\Win32 /I"C:\Program Files\Autodesk\3ds Max 9 SDK\maxsdk\include" /I"C:\Program Files (x86)\Autodesk\3ds Max 9 SDK\maxsdk\include" /I"D:\Develop\iGaia-Mesh-Exporter-3d-Max\Exporter\iGaiaMeshExporter\Libraries" /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _USRDLL /D _CRT_SECURE_NO_DEPRECATE /D _CRT_NONSTDC_NO_DEPRECATE /D _SCL_SECURE_NO_DEPRECATE /D ISOLATION_AWARE_ENABLED=1 /D _WINDLL /Gm- /EHa /RTC1 /MDd /GS /arch:SSE /fp:fast /Zc:wchar_t /Zc:forScope /Fo".\Debug\\" /Fd"C:\Program Files (x86)\Autodesk\3ds Max 9\plugins\iGaiaMeshExporter.dle.pdb" /Gd /TP /analyze- /FC /errorReport:prompt Sources\CMesh.cpp Sources\CSequence.cpp Sources\CSkeleton.cpp
+         CMesh.cpp
+         CSequence.cpp
+     1>d:\develop\igaia-mesh-exporter-3d-max\exporter\igaiameshexporter\sources\csequence.cpp(70): warning C4101: 'parentBone' : unreferenced local variable
+         CSkeleton.cpp
+         Generating Code...
      1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V110\Microsoft.CppBuild.targets(1137,5): warning MSB8012: TargetPath(D:\Develop\iGaia-Mesh-Exporter-3d-Max\Exporter\iGaiaMeshExporter\.\Debug\iGaiaMeshExporter.dll) does not match the Linker's OutputFile property value (C:\Program Files (x86)\Autodesk\3ds Max 9\plugins\iGaiaMeshExporter.dle). This may cause your project to build incorrectly. To correct this, please make sure that $(OutDir), $(TargetName) and $(TargetExt) property values match the value specified in %(Link.OutputFile).
      1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V110\Microsoft.CppBuild.targets(1138,5): warning MSB8012: TargetExt(.dll) does not match the Linker's OutputFile property value (.dle). This may cause your project to build incorrectly. To correct this, please make sure that $(OutDir), $(TargetName) and $(TargetExt) property values match the value specified in %(Link.OutputFile).
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Program Files (x86)\Autodesk\3ds Max 9\plugins\iGaiaMeshExporter.dle" /INCREMENTAL /NOLOGO /LIBPATH:"C:\Program Files\Autodesk\3ds Max 9 SDK\maxsdk\lib" /LIBPATH:"C:\Program Files (x86)\Autodesk\3ds Max 9 SDK\maxsdk\lib" odbc32.lib odbccp32.lib comctl32.lib core.lib geom.lib gfx.lib mesh.lib maxutil.lib maxscrpt.lib paramblk2.lib igame.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /NODEFAULTLIB:libcp.lib /NODEFAULTLIB:libci.lib /NODEFAULTLIB:msvcirt.lib /NODEFAULTLIB:libcmt.lib /NODEFAULTLIB:libcmtd.lib /NODEFAULTLIB:msvcrt.lib /DEF:".\iGaiaMeshExporter.def" /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Program Files (x86)\Autodesk\3ds Max 9\plugins\iGaiaMeshExporter.dle.pdb" /SUBSYSTEM:WINDOWS /TLBID:1 /BASE:"0x16860000" /DYNAMICBASE:NO /IMPLIB:".\Debug\iGaiaMeshExporter.lib" /MACHINE:X86 /SAFESEH   /DLL .\Debug\iGaiaMeshExporter.res
          .\Debug\DllEntry.obj
          .\Debug\iGaiaMeshExporter.obj
-     1>DllEntry.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/SAFESEH' specification
-            Creating library .\Debug\iGaiaMeshExporter.lib and object .\Debug\iGaiaMeshExporter.exp
+         .\Debug\CBone.obj
+         .\Debug\CMesh.obj
+         .\Debug\CSequence.obj
+         .\Debug\CSkeleton.obj
          iGaiaMeshExporter.vcxproj -> D:\Develop\iGaia-Mesh-Exporter-3d-Max\Exporter\iGaiaMeshExporter\.\Debug\iGaiaMeshExporter.dll
      1>Done Building Project "D:\Develop\iGaia-Mesh-Exporter-3d-Max\Exporter\iGaiaMeshExporter\iGaiaMeshExporter.vcxproj" (Build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:02.97
+Time Elapsed 00:00:09.50

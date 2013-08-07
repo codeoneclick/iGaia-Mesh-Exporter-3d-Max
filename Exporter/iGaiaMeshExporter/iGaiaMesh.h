@@ -8,6 +8,12 @@
 #include <algorithm>
 #include <cctype>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/type_precision.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/quaternion.hpp>
+
 #include "IGame/IGame.h"
 #include "IGame/IGameModifier.h"
 
@@ -410,6 +416,7 @@ public:
 			for ( j = 0; j < frame.GetNumTransform(); ++j )
 			{
 				const GMatrix& mat = frame.GetBoneTransform( j );
+
 				Point3 offset = mat.Translation();
 				Quat rotation = mat.Rotation();
 

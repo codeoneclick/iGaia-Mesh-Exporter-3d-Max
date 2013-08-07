@@ -22,6 +22,7 @@
 #include "iGaiaMesh.h"
 #include <sstream>
 #include <fstream>
+#include "Sources/CMesh.h"
 
 #define iGaiaMeshExporter_CLASS_ID	Class_ID(0x9339c6e0, 0x99611b32)
 
@@ -173,7 +174,7 @@ int	iGaiaMeshExporter::DoExport(const TCHAR* name,ExpInterface* ei,Interface* i,
 	IGameScene * pIgame = GetIGameInterface();
 
 	IGameConversionManager* cm = GetConversionManager();
-	cm->SetCoordSystem( IGameConversionManager::IGAME_OGL );
+	cm->SetCoordSystem( IGameConversionManager::IGAME_OGL);
 
 	pIgame->InitialiseIGame(true);
 	pIgame->SetStaticFrame(0);
@@ -182,19 +183,33 @@ int	iGaiaMeshExporter::DoExport(const TCHAR* name,ExpInterface* ei,Interface* i,
 	if ( meshes.Count() == 0 )
 		return FALSE;
 
-	IGameNode* node = meshes[0];
-	IGameObject* obj = node->GetIGameObject();
-	obj->InitializeData();
+	IGameNode* gameNode = meshes[0];
+	IGameObject* gameObject = gameNode->GetIGameObject();
+	gameObject->InitializeData();
+	std::ofstream stream;
 
-	iGaiaMesh	expMesh;
-
-	if ( expMesh.Build(obj, node, name) != iGaiaMesh::RET_OK )
+	CMesh mesh(gameObject, gameNode);
+	if(!mesh.Bind())
+	{
 		goto export_ends_here;
+	}
+	
+	stream.open(name, std::ios::binary | std::ios::out | std::ios::trunc);
+	if(!stream.is_open())
+	{
+		goto export_ends_here;
+	}
+	mesh.Serialize(stream);
+	stream.close();
+
+	/*iGaiaMesh	expMesh;
+	if ( expMesh.Build(obj, node, name) != iGaiaMesh::RET_OK )
+		goto export_ends_here;*/
 	exportResult = TRUE;
 
 export_ends_here:
 
-	node->ReleaseIGameObject();
+	gameNode->ReleaseIGameObject();
 	pIgame->ReleaseIGame();
 
 	return exportResult;

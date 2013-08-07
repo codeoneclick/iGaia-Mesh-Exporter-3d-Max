@@ -244,7 +244,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <WholeProgramOptimization>false</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>.\midl\Win32;C:\Program Files\Autodesk\3ds Max 9 SDK\maxsdk\include;C:\Program Files %28x86%29\Autodesk\3ds Max 9 SDK\maxsdk\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\midl\Win32;C:\Program Files\Autodesk\3ds Max 9 SDK\maxsdk\include;C:\Program Files %28x86%29\Autodesk\3ds Max 9 SDK\maxsdk\include;D:\Develop\iGaia-Mesh-Exporter-3d-Max\Exporter\iGaiaMeshExporter\Libraries;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;ISOLATION_AWARE_ENABLED=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Async</ExceptionHandling>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -442,12 +442,21 @@
   <ItemGroup>
     <ClCompile Include="DllEntry.cpp" />
     <ClCompile Include="iGaiaMeshExporter.cpp" />
+    <ClCompile Include="Sources\CBone.cpp" />
+    <ClCompile Include="Sources\CMesh.cpp" />
+    <ClCompile Include="Sources\CSequence.cpp" />
+    <ClCompile Include="Sources\CSkeleton.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="iGaiaMesh.h" />
     <ClInclude Include="3dsmaxsdk_preinclude.h" />
     <ClInclude Include="iGaiaMeshExporter.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="Sources\CBone.h" />
+    <ClInclude Include="Sources\CMesh.h" />
+    <ClInclude Include="Sources\CSequence.h" />
+    <ClInclude Include="Sources\CSkeleton.h" />
+    <ClInclude Include="Sources\HCommon.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="iGaiaMeshExporter.def" />
