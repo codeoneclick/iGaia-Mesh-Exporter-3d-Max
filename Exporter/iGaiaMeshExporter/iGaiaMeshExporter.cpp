@@ -168,48 +168,47 @@ BOOL iGaiaMeshExporter::SupportsOptions(int ext, DWORD options)
 int	iGaiaMeshExporter::DoExport(const TCHAR* name,ExpInterface* ei,Interface* i, BOOL suppressPrompts, DWORD options)
 {
 	int exportResult = FALSE;
-	std::stringstream ss;
-	std::ofstream os;
 
 	IGameScene * pIgame = GetIGameInterface();
-
 	IGameConversionManager* cm = GetConversionManager();
 	cm->SetCoordSystem( IGameConversionManager::IGAME_OGL);
 
 	pIgame->InitialiseIGame(true);
 	pIgame->SetStaticFrame(0);
 
-	Tab<IGameNode*> meshes = pIgame->GetIGameNodeByType( IGameObject::IGAME_MESH );
-	if ( meshes.Count() == 0 )
-		return FALSE;
-
-	IGameNode* gameNode = meshes[0];
-	IGameObject* gameObject = gameNode->GetIGameObject();
-	gameObject->InitializeData();
-	std::ofstream stream;
-
-	CMesh mesh(gameObject, gameNode);
-	if(!mesh.Bind())
-	{
-		goto export_ends_here;
-	}
+	Tab<IGameNode*> gameMeshes = pIgame->GetIGameNodeByType(IGameObject::IGAME_MESH);
+	i32 numGameMeshes = gameMeshes.Count();
 	
-	stream.open(name, std::ios::binary | std::ios::out | std::ios::trunc);
-	if(!stream.is_open())
+	if (numGameMeshes == 0)
+	{
+		return false;
+	}
+
+	std::vector<IGameNode*> gameNodes;
+	std::vector<IGameObject*> gameObjects;
+
+	for(size_t i = 0;  i < numGameMeshes; ++i)
+	{
+		IGameNode *gameNode = gameMeshes[i];
+		IGameObject *gameObject = gameNode->GetIGameObject();
+		if(gameNode != nullptr && gameObject != nullptr)
+		{
+			gameObject->InitializeData();
+			gameNodes.push_back(gameNode);
+			gameObjects.push_back(gameObject);
+		}
+	}
+
+	CMesh mesh(gameNodes, gameObjects);
+	if(!mesh.bind())
 	{
 		goto export_ends_here;
 	}
-	mesh.Serialize(stream);
-	stream.close();
 
-	/*iGaiaMesh	expMesh;
-	if ( expMesh.Build(obj, node, name) != iGaiaMesh::RET_OK )
-		goto export_ends_here;*/
+	mesh.serialize(name);
 	exportResult = TRUE;
-
 export_ends_here:
 
-	gameNode->ReleaseIGameObject();
 	pIgame->ReleaseIGame();
 
 	return exportResult;

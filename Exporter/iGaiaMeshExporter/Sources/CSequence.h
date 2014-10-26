@@ -14,6 +14,11 @@ protected:
 
 public:
 
+	CFrame(void)
+	{
+
+	};
+
 	CFrame(i32 _numBones)
 	{
 		m_transformations.resize(_numBones);
@@ -44,20 +49,18 @@ private:
 
 protected:
 
-	IGameObject* m_gameObject;
+	std::vector<IGameObject*> m_gameObjects;
 	CSkeleton* m_skeleton;
 	std::vector<SVertex> m_vertexData;
 	std::vector<CFrame> m_frames;
 
-	bool _BindVertexWeights(void);
-
 public:
 
-	CSequence(IGameObject* _gameObject, CSkeleton* _skeleton, const std::vector<SVertex>& _vertexData);
+	CSequence(std::vector<IGameObject*>& gameObjects, CSkeleton* skeleton, const std::vector<SVertex>& vertexData);
 	~CSequence(void);
 
-	bool Bind(void);
-	void Serialize(std::ofstream& _stream);
+	bool bind(void);
+	void serialize(std::ofstream& stream);
 };
 
 #endif

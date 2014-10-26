@@ -10,36 +10,34 @@ private:
 
 protected:
 
-	IGameObject* m_gameObject;
-	IGameNode* m_gameNode;
-
+	std::vector<IGameObject*> m_gameObjects;
 	std::vector<CBone*> m_bones;
 	std::vector<CBone*> m_roots;
 
-	void _LinkBone(IGameNode* _gameNode, i32 _gameNodeId);
-	void _LinkBone(CBone* _bone);
-	CBone* _Get_Bone(i32 _gameNodeId);
-	void _SerializeBone(std::ofstream& _stream, CBone* _bone);
+	void linkBone(IGameNode* gameNode, i32 gameNodeId);
+	void linkBone(CBone* bone);
+	CBone* getBoneWithGameNodeId(i32 gameNodeId);
+	void serializeBone(std::ofstream& stream, CBone* bone);
 
 public:
 
-	CSkeleton(IGameObject* _gameObject, IGameNode* _gameNode);
+	CSkeleton(std::vector<IGameObject*>& gameObjects);
 	~CSkeleton(void);
 
-	inline i32 Get_NumBones(void)
+	inline i32 getNumBones(void)
 	{
 		return m_bones.size();
 	};
 
-	inline CBone* Get_Bone(i32 _boneId)
+	inline CBone* getBoneWithBoneId(i32 boneId)
 	{
-		return m_bones[_boneId];
+		return m_bones.at(boneId);
 	};
 
-	i32 Get_BoneId(i32 _gameNodeId);
+	i32 getBoneId(i32 gameNodeId);
 
-	bool Bind(void);
-	void Serialize(std::ofstream& _stream);
+	bool bind(void);
+	void serialize(std::ofstream& stream);
 };
 
 #endif

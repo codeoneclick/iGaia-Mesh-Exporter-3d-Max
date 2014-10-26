@@ -3,6 +3,12 @@
 *.lo
 *.o
 
+# Debug information
+*.ncb
+*.sdf
+*.obj
+*.opensdf
+
 # Compiled Dynamic libraries
 *.so
 

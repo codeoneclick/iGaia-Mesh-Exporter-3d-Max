@@ -2,9 +2,9 @@
 #include "CSequence.h"
 #include "CSkeleton.h"
 
-CMesh::CMesh(IGameObject* _gameObject, IGameNode* _gameNode) :
-	m_gameObject(_gameObject),
-	m_gameNode(_gameNode),
+CMesh::CMesh(std::vector<IGameNode*>& gameNodes, std::vector<IGameObject*>& gameObjects) :
+	m_gameNodes(gameNodes),
+	m_gameObjects(gameObjects),
 	m_skeleton(nullptr),
 	m_sequence(nullptr)
 {
@@ -19,94 +19,149 @@ CMesh::~CMesh(void)
 	m_sequence = nullptr;
 }
 
-bool CMesh::Bind(void)
+bool CMesh::bind(void)
 {
-	bool result = CMesh::_BindMesh();
+	m_skeleton = new CSkeleton(m_gameObjects);
+	bool result = m_skeleton->bind();
+
 	if(result)
 	{
-		m_skeleton = new CSkeleton(m_gameObject, m_gameNode);
-		result = m_skeleton->Bind();
+		result = CMesh::bindMesh();
 		if(result)
 		{
-			m_sequence = new CSequence(m_gameObject, m_skeleton, m_vertexData);
-			result = m_sequence->Bind();
+			m_sequence = new CSequence(m_gameObjects, m_skeleton, m_vertexData);
+			result = m_sequence->bind();
 		}
 	}
 	return result;
 }
 
-bool CMesh::_BindMesh(void)
+bool CMesh::bindMesh(void)
 {
-	if (m_gameObject == nullptr || m_gameNode == nullptr)
+	if(m_gameNodes.size() == 0 || 
+		m_gameObjects.size() == 0 ||
+		m_gameNodes.size() != m_gameObjects.size())
 	{
 		return false;
 	}
-	if (m_gameObject->GetIGameType() != IGameMesh::IGAME_MESH)
-	{
-		return false;
-	}
-	IGameMesh* mesh	= static_cast<IGameMesh*>(m_gameObject);
-		
-	const i32 numVertexes = mesh->GetNumberOfVerts();
-	const i32 numTriangles = mesh->GetNumberOfFaces();
-	Tab<int> textureMap	= mesh->GetActiveMapChannelNum();
 
-	if (textureMap.Count() <= 0)
+	i32 totalNumVertexes = 0;
+	i32 totalNumTriangles = 0;
+
+	const size_t gameObjectsCount = m_gameObjects.size();
+	for(size_t k = 0; k < gameObjectsCount; ++k)
 	{
-		return false;
+		IGameNode *gameNode = m_gameNodes.at(k);
+		IGameObject *gameObject = m_gameObjects.at(k);
+		if(gameObject->GetIGameType() != IGameMesh::IGAME_MESH)
+		{
+			continue;
+		}
+		IGameMesh *gameMesh	= static_cast<IGameMesh*>(gameObject);
+		totalNumVertexes += gameMesh->GetNumberOfVerts();
+		totalNumTriangles += gameMesh->GetNumberOfFaces();
 	}
 
 	m_vertexData.clear();
 	m_indexData.clear();
 
-	m_indexData.resize(numTriangles * 3);
+	m_vertexData.resize(0);
+	m_indexData.resize(totalNumTriangles * 3);
 
-	SVertex vertex;
-	for(i32 i = 0; i < numTriangles; ++i)
+	for(size_t k = 0; k < gameObjectsCount; ++k)
 	{
-		FaceEx* triangle = mesh->GetFace(i);
-		for(i32 j = 0; j < 3; ++j)
+		IGameObject *gameObject = m_gameObjects.at(k);
+		if(gameObject->GetIGameType() != IGameMesh::IGAME_MESH)
 		{
-			Point3 position = mesh->GetVertex(triangle->vert[j]);
-			vertex.m_position = glm::vec3(position.x, position.y, position.z);
-			Point3 normal = mesh->GetNormal(triangle->norm[j]);
-			vertex.m_normal = glm::vec3(normal.x, normal.y, normal.z);
-			Point3 tangent = mesh->GetTangent(triangle->vert[j]);
-			vertex.m_tangent = glm::vec3(tangent.x, tangent.y, tangent.z);
-			vertex.m_id = triangle->vert[j];
+			continue;
+		}
+		IGameMesh *gameMesh	= static_cast<IGameMesh*>(gameObject);
+		IGameSkin *gameSkin	= gameObject->GetIGameSkin();
 
-			DWORD texcoordIndexes[3];
-			Point3 texcoord;
-			if (mesh->GetMapFaceIndex(textureMap[0], i, texcoordIndexes))
-			{
-				texcoord = mesh->GetMapVertex(textureMap[0], texcoordIndexes[j]);
-			}
-			else
-			{
-				texcoord = mesh->GetMapVertex(textureMap[0], triangle->vert[j]);
-			}
-			vertex.m_texcoord = glm::vec2(texcoord.x, 1.0f - texcoord.y);
+		Tab<int> textureMap	= gameMesh->GetActiveMapChannelNum();
+		if (textureMap.Count() <= 0)
+		{
+			return false;
+		}
 
-			ui32 index = 0;
-			auto iterator = m_vertexData.begin();
-			for(; iterator != m_vertexData.end(); ++iterator, ++index)
+		i32 numVertexes = gameMesh->GetNumberOfVerts();
+		i32 numTriangles = gameMesh->GetNumberOfFaces();
+		i32 indicesOffset = 0;
+		for(i32 i = 0; i < numTriangles; ++i)
+		{
+			FaceEx *triangle = gameMesh->GetFace(i);
+			for(i32 j = 0; j < 3; ++j)
 			{
-				if((*iterator) == vertex)
+				SVertex vertex;
+				Point3 position = gameMesh->GetVertex(triangle->vert[j]);
+				vertex.m_position = glm::vec3(position.x, position.y, position.z);
+				Point3 normal = gameMesh->GetNormal(triangle->norm[j]);
+				vertex.m_normal = glm::vec3(normal.x, normal.y, normal.z);
+				Point3 tangent = gameMesh->GetTangent(triangle->vert[j]);
+				vertex.m_tangent = glm::vec3(tangent.x, tangent.y, tangent.z);
+				vertex.m_id = triangle->vert[j];
+
+				DWORD texcoordIndexes[3];
+				Point3 texcoord;
+				if (gameMesh->GetMapFaceIndex(textureMap[0], i, texcoordIndexes))
 				{
-					m_indexData[3 * i + j] = index;
-					break;
+					texcoord = gameMesh->GetMapVertex(textureMap[0], texcoordIndexes[j]);
+				}
+				else
+				{
+					texcoord = gameMesh->GetMapVertex(textureMap[0], triangle->vert[j]);
+				}
+				vertex.m_texcoord = glm::vec2(texcoord.x, 1.0 - texcoord.y);
+
+				auto iterator = m_vertexData.begin();
+				for(ui32 index = 0; iterator != m_vertexData.end(); ++iterator, ++index)
+				{
+					if((*iterator) == vertex)
+					{
+						m_indexData[3 * i + j + indicesOffset] = index;
+						break;
+					}
+				}
+
+				if(iterator == m_vertexData.end())
+				{
+					m_indexData[3 * i + j + indicesOffset] = m_vertexData.size();
+
+					if(gameSkin != nullptr &&  IGameSkin::IGAME_SKIN == gameSkin->GetSkinType())
+					{
+						i32 numWeights = gameSkin->GetNumberOfBones(vertex.m_id);
+
+						if (IGameSkin::IGAME_RIGID == gameSkin->GetVertexType(vertex.m_id))
+						{
+							numWeights = 1;
+						}
+
+						for (i32 z = 0; z < numWeights; ++z)
+						{
+							f32 weight = gameSkin->GetWeight(vertex.m_id, z);
+							if (numWeights == 1)
+							{
+								weight = 1.0f;
+							}
+							i32 boneId = m_skeleton->getBoneId(gameSkin->GetBoneID(vertex.m_id, z));
+							SBoneWeight boneWeight;
+							boneWeight.m_weight = weight;
+							boneWeight.m_boneId = boneId;
+							vertex.m_weights.push_back(boneWeight);
+						}
+					}
+					if(vertex.m_weights.size() > 4)
+					{
+						return false;
+					}
+					m_vertexData.push_back(vertex);
 				}
 			}
-
-			if(iterator == m_vertexData.end())
-			{
-				m_indexData[3 * i + j] = index;
-				m_vertexData.push_back(vertex);
-			}
 		}
+		indicesOffset += numTriangles * 3;
 	}
 
-	GMatrix matrix = m_gameNode->GetObjectTM(0);
+	/*GMatrix matrix = m_gameNode->GetObjectTM(0);
 	if(-1 == matrix.Parity())
 	{
 		std::vector<i32> swapIndexData;
@@ -118,39 +173,64 @@ bool CMesh::_BindMesh(void)
 			swapIndexData[3 * i + 2] = m_indexData[3 * i + 0];
 		}
 		m_indexData.swap(swapIndexData);
-	}
+	}*/
 	return true;
 }
 
-void CMesh::Serialize(std::ofstream& _stream)
+void CMesh::serialize(const std::string& filename)
 {
+	std::ofstream stream;
+	std::string meshFilename = filename + "_mesh";
+	stream.open(meshFilename, std::ios::binary | std::ios::out | std::ios::trunc);
+	if(!stream.is_open())
+	{
+		return;
+	}
+
 	i32 numVertexes = m_vertexData.size();
 	i32 numIndexes = m_indexData.size();
-	_stream.write((char*)&numVertexes, sizeof(i32));
-	_stream.write((char*)&numIndexes, sizeof(i32));
+	stream.write((char*)&numVertexes, sizeof(i32));
+	stream.write((char*)&numIndexes, sizeof(i32));
 
 	for(i32 i = 0; i < m_vertexData.size(); ++i)
 	{
-		_stream.write((char*)&m_vertexData[i].m_position, sizeof(glm::vec3));
-		_stream.write((char*)&m_vertexData[i].m_normal, sizeof(glm::vec3));
-		_stream.write((char*)&m_vertexData[i].m_tangent, sizeof(glm::vec3));
-		_stream.write((char*)&m_vertexData[i].m_texcoord, sizeof(glm::vec2));
+		stream.write((char*)&m_vertexData[i].m_position, sizeof(glm::vec3));
+		stream.write((char*)&m_vertexData[i].m_normal, sizeof(glm::vec3));
+		stream.write((char*)&m_vertexData[i].m_tangent, sizeof(glm::vec3));
+		stream.write((char*)&m_vertexData[i].m_texcoord, sizeof(glm::vec2));
+
+		i32 numWeights = m_vertexData[i].m_weights.size();
+		stream.write((char*)&numWeights, sizeof(i32));
+		for (i32 j = 0; j < numWeights; ++j)
+		{
+			i32 boneId = m_vertexData[i].m_weights[j].m_boneId;
+			f32 weight = m_vertexData[i].m_weights[j].m_weight;
+			stream.write((char*)&boneId, sizeof(i32));
+			stream.write((char*)&weight, sizeof(f32));
+		}
 	}
 
 	for(i32 i = 0; i < m_indexData.size(); ++i)
 	{
-		_stream.write((char*)&m_indexData[i], sizeof(ui16));
+		stream.write((char*)&m_indexData[i], sizeof(ui16));
 	}
-	if(m_skeleton != nullptr && m_sequence != nullptr)
+	stream.close();
+
+	std::string skeletonFilename = filename + "_sk";
+	stream.open(skeletonFilename, std::ios::binary | std::ios::out | std::ios::trunc);
+	if(!stream.is_open() || m_skeleton == nullptr)
 	{
-		i32 animation = 1;
-		_stream.write((char*)&animation, sizeof(i32));
-		m_skeleton->Serialize(_stream);
-		m_sequence->Serialize(_stream);
+		return;
 	}
-	else
+	m_skeleton->serialize(stream);
+	stream.close();
+
+	std::string sequenceFilename = filename + "_anim";
+	stream.open(sequenceFilename, std::ios::binary | std::ios::out | std::ios::trunc);
+	if(!stream.is_open() || m_sequence == nullptr)
 	{
-		i32 animation = 0;
-		_stream.write((char*)&animation, sizeof(i32));
+		return;
 	}
+	m_sequence->serialize(stream);
+	stream.close();
 }

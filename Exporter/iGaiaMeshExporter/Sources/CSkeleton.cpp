@@ -1,9 +1,8 @@
 #include "CSkeleton.h"
 #include "CBone.h"
 
-CSkeleton::CSkeleton(IGameObject* _gameObject, IGameNode* _gameNode) :
-	m_gameObject(_gameObject),
-	m_gameNode(m_gameNode)
+CSkeleton::CSkeleton(std::vector<IGameObject*>& gameObjects) :
+	m_gameObjects(gameObjects)
 {
 
 }
@@ -13,23 +12,23 @@ CSkeleton::~CSkeleton(void)
 
 }
 
-void CSkeleton::_LinkBone(IGameNode* _gameNode, i32 _gameNodeId)
+void CSkeleton::linkBone(IGameNode* gameNode, i32 gameNodeId)
 {
-	if (nullptr != CSkeleton::_Get_Bone(_gameNodeId))
+	if (nullptr != CSkeleton::getBoneWithGameNodeId(gameNodeId))
 	{
 		return;
 	}
 
 	CBone* bone = new CBone();
-	bone->Set_GameNode(_gameNode);
-	bone->Set_GameNodeId(_gameNodeId);
-	bone->Set_Name(_gameNode->GetName());
+	bone->Set_GameNode(gameNode);
+	bone->Set_GameNodeId(gameNodeId);
+	bone->Set_Name(gameNode->GetName());
 	bone->Set_Id(m_bones.size());
 	m_bones.push_back(bone);
 }
 
 
-void CSkeleton::_LinkBone(CBone* bone)
+void CSkeleton::linkBone(CBone* bone)
 {
 	IGameNode* gameNode = bone->Get_GameNode();
 	IGameNode* gameNodeParent = gameNode->GetNodeParent();
@@ -37,7 +36,7 @@ void CSkeleton::_LinkBone(CBone* bone)
 
 	if (gameNodeParent != nullptr)
 	{
-		parentBone = CSkeleton::_Get_Bone(gameNodeParent->GetNodeID());
+		parentBone = CSkeleton::getBoneWithGameNodeId(gameNodeParent->GetNodeID());
 	}
 
 	if (parentBone == nullptr)
@@ -50,12 +49,12 @@ void CSkeleton::_LinkBone(CBone* bone)
 	}
 }
 
-CBone* CSkeleton::_Get_Bone(i32 _gameNodeId)
+CBone* CSkeleton::getBoneWithGameNodeId(i32 gameNodeId)
 {
 	std::vector<CBone*>::const_iterator iterator = m_bones.begin();
 	for(; iterator != m_bones.end(); ++iterator)
 	{
-		if ((*iterator)->Get_GameNodeId() == _gameNodeId)
+		if ((*iterator)->Get_GameNodeId() == gameNodeId)
 		{
 			return (*iterator);
 		}
@@ -63,49 +62,45 @@ CBone* CSkeleton::_Get_Bone(i32 _gameNodeId)
 	return nullptr;
 }
 
-i32  CSkeleton::Get_BoneId(i32 _gameNodeId)
+i32  CSkeleton::getBoneId(i32 gameNodeId)
 {
-	CBone* bone = _Get_Bone(_gameNodeId);
+	CBone* bone = CSkeleton::getBoneWithGameNodeId(gameNodeId);
 	if (bone == nullptr)
 	{
-			return -1;
+		return -1;
 	}
 	return bone->Get_Id();
 };
 
-bool CSkeleton::Bind(void)
+bool CSkeleton::bind(void)
 {
-	if(m_gameObject == nullptr)
+	const size_t gameObjectsCount = m_gameObjects.size();
+	for(size_t k = 0; k < gameObjectsCount; ++k)
 	{
-		return false;
-	}
-	
-	IGameSkin* skin = m_gameObject->GetIGameSkin();
-	if(!skin)
-	{
-		return false;
-	}
-
-	if(IGameSkin::IGAME_SKIN != skin->GetSkinType())
-	{
-		return false;
-	}
-
-	i32 vertexType;
-	const i32 numSkinnedVerts = skin->GetNumOfSkinnedVerts();
-
-	for(i32 i = 0; i < numSkinnedVerts; ++i)
-	{
-		vertexType = skin->GetVertexType(i);
-		if(IGameSkin::IGAME_RIGID == vertexType)
+		IGameObject *gameObject = m_gameObjects.at(k);
+		IGameSkin *skin	= gameObject->GetIGameSkin();
+		if(skin == nullptr ||
+		   IGameSkin::IGAME_SKIN != skin->GetSkinType())
 		{
-			CSkeleton::_LinkBone(skin->GetIGameBone(i, 0), skin->GetBoneID(i, 0));
+			continue;
 		}
-		else
+
+		i32 vertexType;
+		const i32 numSkinnedVerts = skin->GetNumOfSkinnedVerts();
+
+		for(i32 i = 0; i < numSkinnedVerts; ++i)
 		{
-			for(int j = 0; j < skin->GetNumberOfBones(i); ++j )
+			vertexType = skin->GetVertexType(i);
+			if(IGameSkin::IGAME_RIGID == vertexType)
 			{
-				CSkeleton::_LinkBone(skin->GetIGameBone(i, j), skin->GetBoneID(i, j));
+				CSkeleton::linkBone(skin->GetIGameBone(i, 0), skin->GetBoneID(i, 0));
+			}
+			else
+			{
+				for(int j = 0; j < skin->GetNumberOfBones(i); ++j )
+				{
+					CSkeleton::linkBone(skin->GetIGameBone(i, j), skin->GetBoneID(i, j));
+				}
 			}
 		}
 	}
@@ -113,36 +108,36 @@ bool CSkeleton::Bind(void)
 	std::vector<CBone*>::const_iterator iterator = m_bones.begin();
 	for (; iterator != m_bones.end(); ++iterator)
 	{
-		CSkeleton::_LinkBone((*iterator));
+		CSkeleton::linkBone((*iterator));
 	}
 	return true;
 }
 
-void CSkeleton::Serialize(std::ofstream& _stream)
+void CSkeleton::serialize(std::ofstream& stream)
 {
 	i32 numBones = m_bones.size();
-	_stream.write((char*)&numBones, sizeof(i32));
+	stream.write((char*)&numBones, sizeof(i32));
 
 	std::vector<CBone*>::iterator iterator = m_roots.begin();
 	for(; iterator != m_roots.end(); ++iterator)
 	{
 		CBone* bone = (*iterator);
-		CSkeleton::_SerializeBone(_stream, bone);
+		CSkeleton::serializeBone(stream, bone);
 	}
 }
 
-void CSkeleton::_SerializeBone(std::ofstream& _stream, CBone* bone)
+void CSkeleton::serializeBone(std::ofstream& stream, CBone* bone)
 {
 	i32 boneId = bone->Get_Id();
 	i32 boneParentId = bone->Get_ParentId();
-	_stream.write((char*)&boneId, sizeof(i32));
-	_stream.write((char*)&boneParentId, sizeof(i32));
+	stream.write((char*)&boneId, sizeof(i32));
+	stream.write((char*)&boneParentId, sizeof(i32));
 
 	std::vector<CBone*> childs = bone->Get_Childs();
 	std::vector<CBone*>::iterator iterator = childs.begin();
 	for(; iterator != childs.end(); ++iterator)
 	{
 		CBone* bone = (*iterator);
-		CSkeleton::_SerializeBone(_stream, bone);
+		CSkeleton::serializeBone(stream, bone);
 	}
 }

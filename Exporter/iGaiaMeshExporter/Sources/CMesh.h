@@ -9,6 +9,24 @@ struct SBoneWeight
 	f32 m_weight;
 };
 
+inline bool isEqual(f32 value01, f32 value02)
+{
+	 return fabsf(value01 - value02) < FLT_EPSILON;
+}
+
+inline bool isEqual(const glm::vec2& value01, const glm::vec2& value02)
+{
+	return isEqual(value01.x, value02.x) &&
+		isEqual(value01.y, value02.y);
+}
+
+inline bool isEqual(const glm::vec3& value01, const glm::vec3& value02)
+{
+	return isEqual(value01.x, value02.x) &&
+		isEqual(value01.y, value02.y) &&
+		isEqual(value01.z, value02.z);
+}
+
 struct SVertex
 {
 	glm::vec3 m_position;
@@ -18,15 +36,15 @@ struct SVertex
 	i32 m_id;
 	std::vector<SBoneWeight> m_weights;
 
-	bool operator==(const SVertex& _vertex)const
+	bool operator==(const SVertex& vertex)const
 	{
-		return (m_position == _vertex.m_position && m_normal == _vertex.m_normal && m_texcoord == _vertex.m_texcoord);
+		return isEqual(m_position, vertex.m_position) &&
+			isEqual(m_texcoord, vertex.m_texcoord);
 	};
 };
 
 class CSkeleton;
 class CSequence;
-
 
 class CMesh
 {
@@ -40,17 +58,17 @@ protected:
 	std::vector<i32> m_indexData;
 	std::vector<SVertex> m_vertexData;
 
-	IGameObject* m_gameObject;
-	IGameNode* m_gameNode;
+	std::vector<IGameNode*> m_gameNodes;
+	std::vector<IGameObject*> m_gameObjects;
 
-	bool _BindMesh(void);
+	bool bindMesh(void);
 
 public:
 
-	CMesh(IGameObject* _gameObject, IGameNode* _gameNode);
+	CMesh(std::vector<IGameNode*>& gameNodes, std::vector<IGameObject*>& gameObjects);
 	~CMesh(void);
 
-	bool Bind(void);
-	void Serialize(std::ofstream& _stream);
+	bool bind(void);
+	void serialize(const std::string& filename);
 };
 #endif
