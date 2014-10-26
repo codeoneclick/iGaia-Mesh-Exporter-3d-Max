@@ -67,6 +67,7 @@ bool CMesh::bindMesh(void)
 
 	m_vertexData.resize(0);
 	m_indexData.resize(totalNumTriangles * 3);
+	i32 indicesOffset = 0;
 
 	for(size_t k = 0; k < gameObjectsCount; ++k)
 	{
@@ -86,20 +87,22 @@ bool CMesh::bindMesh(void)
 
 		i32 numVertexes = gameMesh->GetNumberOfVerts();
 		i32 numTriangles = gameMesh->GetNumberOfFaces();
-		i32 indicesOffset = 0;
+		
 		for(i32 i = 0; i < numTriangles; ++i)
 		{
 			FaceEx *triangle = gameMesh->GetFace(i);
 			for(i32 j = 0; j < 3; ++j)
 			{
 				SVertex vertex;
-				Point3 position = gameMesh->GetVertex(triangle->vert[j]);
+				i32 indexId = triangle->vert[j];
+				Point3 position = gameMesh->GetVertex(indexId);
 				vertex.m_position = glm::vec3(position.x, position.y, position.z);
 				Point3 normal = gameMesh->GetNormal(triangle->norm[j]);
 				vertex.m_normal = glm::vec3(normal.x, normal.y, normal.z);
-				Point3 tangent = gameMesh->GetTangent(triangle->vert[j]);
+				Point3 tangent = gameMesh->GetTangent(indexId);
 				vertex.m_tangent = glm::vec3(tangent.x, tangent.y, tangent.z);
-				vertex.m_id = triangle->vert[j];
+				vertex.m_indexId = indexId;
+				vertex.m_uniqueId = indexId + indicesOffset;
 
 				DWORD texcoordIndexes[3];
 				Point3 texcoord;
@@ -109,7 +112,7 @@ bool CMesh::bindMesh(void)
 				}
 				else
 				{
-					texcoord = gameMesh->GetMapVertex(textureMap[0], triangle->vert[j]);
+					texcoord = gameMesh->GetMapVertex(textureMap[0], indexId);
 				}
 				vertex.m_texcoord = glm::vec2(texcoord.x, 1.0 - texcoord.y);
 
@@ -129,21 +132,21 @@ bool CMesh::bindMesh(void)
 
 					if(gameSkin != nullptr &&  IGameSkin::IGAME_SKIN == gameSkin->GetSkinType())
 					{
-						i32 numWeights = gameSkin->GetNumberOfBones(vertex.m_id);
+						i32 numWeights = gameSkin->GetNumberOfBones(vertex.m_indexId);
 
-						if (IGameSkin::IGAME_RIGID == gameSkin->GetVertexType(vertex.m_id))
+						if (IGameSkin::IGAME_RIGID == gameSkin->GetVertexType(vertex.m_indexId))
 						{
 							numWeights = 1;
 						}
 
 						for (i32 z = 0; z < numWeights; ++z)
 						{
-							f32 weight = gameSkin->GetWeight(vertex.m_id, z);
+							f32 weight = gameSkin->GetWeight(vertex.m_indexId, z);
 							if (numWeights == 1)
 							{
 								weight = 1.0f;
 							}
-							i32 boneId = m_skeleton->getBoneId(gameSkin->GetBoneID(vertex.m_id, z));
+							i32 boneId = m_skeleton->getBoneId(gameSkin->GetBoneID(vertex.m_indexId, z));
 							SBoneWeight boneWeight;
 							boneWeight.m_weight = weight;
 							boneWeight.m_boneId = boneId;

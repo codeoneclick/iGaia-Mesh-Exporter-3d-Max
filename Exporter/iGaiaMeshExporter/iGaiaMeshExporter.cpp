@@ -191,7 +191,9 @@ int	iGaiaMeshExporter::DoExport(const TCHAR* name,ExpInterface* ei,Interface* i,
 	{
 		IGameNode *gameNode = gameMeshes[i];
 		IGameObject *gameObject = gameNode->GetIGameObject();
-		if(gameNode != nullptr && gameObject != nullptr)
+		if(gameNode != nullptr &&
+			gameObject != nullptr && 
+			gameObject->GetIGameType() == IGameMesh::IGAME_MESH)
 		{
 			gameObject->InitializeData();
 			gameNodes.push_back(gameNode);

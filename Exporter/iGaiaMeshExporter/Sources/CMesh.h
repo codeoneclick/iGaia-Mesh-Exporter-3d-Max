@@ -33,13 +33,16 @@ struct SVertex
 	glm::vec3 m_normal;
 	glm::vec2 m_texcoord;
 	glm::vec3 m_tangent;
-	i32 m_id;
+	i32 m_indexId;
+	i32 m_uniqueId;
+
 	std::vector<SBoneWeight> m_weights;
 
 	bool operator==(const SVertex& vertex)const
 	{
-		return isEqual(m_position, vertex.m_position) &&
-			isEqual(m_texcoord, vertex.m_texcoord);
+		return m_uniqueId == vertex.m_uniqueId;
+		/*return isEqual(m_position, vertex.m_position) &&
+			isEqual(m_texcoord, vertex.m_texcoord);*/
 	};
 };
 
