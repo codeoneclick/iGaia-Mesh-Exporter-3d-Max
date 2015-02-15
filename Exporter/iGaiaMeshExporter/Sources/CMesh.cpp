@@ -237,6 +237,7 @@ void CMesh::serialize(const std::string& filename)
 	}
 
 	m_skeleton->serialize(stream);
+	m_sequence->serialize(stream);
 	stream.close();
 
 #elif defined(__ANIMATION__)

@@ -1,4 +1,4 @@
-﻿Build started 2/15/2015 11:33:50 AM.
+﻿Build started 2/15/2015 6:59:31 PM.
      1>Project "D:\Develop\iGaia-Mesh-Exporter-3d-Max\Exporter\iGaiaMeshExporter\ie3D-Exporter.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /I.\midl\Win32 /I"C:\Program Files\Autodesk\3ds Max 9 SDK\maxsdk\include" /I"C:\Program Files (x86)\Autodesk\3ds Max 9 SDK\maxsdk\include" /I"D:\Develop\iGaia-Mesh-Exporter-3d-Max\Exporter\iGaiaMeshExporter\Libraries" /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _USRDLL /D _CRT_SECURE_NO_DEPRECATE /D _CRT_NONSTDC_NO_DEPRECATE /D _SCL_SECURE_NO_DEPRECATE /D ISOLATION_AWARE_ENABLED=1 /D __ANIMATION__=1 /D _WINDLL /Gm- /EHa /RTC1 /MDd /GS /arch:SSE /fp:fast /Zc:wchar_t /Zc:forScope /Fo".\Debug\\" /Fd"C:\Program Files (x86)\Autodesk\3ds Max 9\plugins\ie3Danimation.dle.pdb" /Gd /TP /analyze- /FC /errorReport:prompt DllEntry.cpp ie3Dexporter.cpp Sources\CBone.cpp Sources\CMesh.cpp Sources\CSequence.cpp Sources\CSkeleton.cpp
@@ -17,11 +17,9 @@
          .\Debug\CMesh.obj
          .\Debug\CSequence.obj
          .\Debug\CSkeleton.obj
-     1>DllEntry.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/SAFESEH' specification
-            Creating library .\Debug\ie3Danimation.lib and object .\Debug\ie3Danimation.exp
          ie3D-Exporter.vcxproj -> D:\Develop\iGaia-Mesh-Exporter-3d-Max\Exporter\iGaiaMeshExporter\.\Debug\ie3Danimation.dle
      1>Done Building Project "D:\Develop\iGaia-Mesh-Exporter-3d-Max\Exporter\iGaiaMeshExporter\ie3D-Exporter.vcxproj" (Build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:15.47
+Time Elapsed 00:00:16.41
