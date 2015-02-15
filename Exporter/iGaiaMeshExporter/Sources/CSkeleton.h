@@ -35,6 +35,7 @@ public:
 	};
 
 	i32 getBoneId(i32 gameNodeId);
+	i32 getBoneId(IGameNode *gameNode);
 
 	bool bind(void);
 	void serialize(std::ofstream& stream);

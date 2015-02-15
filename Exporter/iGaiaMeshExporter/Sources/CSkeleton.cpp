@@ -72,6 +72,19 @@ i32  CSkeleton::getBoneId(i32 gameNodeId)
 	return bone->Get_Id();
 };
 
+i32 CSkeleton::getBoneId(IGameNode *gameNode)
+{
+	std::vector<CBone*>::const_iterator iterator = m_bones.begin();
+	for(; iterator != m_bones.end(); ++iterator)
+	{
+		if ((*iterator)->Get_GameNode() == gameNode)
+		{
+			return (*iterator)->Get_Id();
+		}
+	}
+	return -1;
+}
+
 bool CSkeleton::bind(void)
 {
 	const size_t gameObjectsCount = m_gameObjects.size();

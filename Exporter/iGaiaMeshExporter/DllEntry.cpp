@@ -12,9 +12,9 @@
 // AUTHOR: 
 //***************************************************************************/
 
-#include "iGaiaMeshExporter.h"
+#include "ie3Dexporter.h"
 
-extern ClassDesc2* GetiGaiaMeshExporterDesc();
+extern ClassDesc2* getIE3DexporterDescription();
 
 HINSTANCE hInstance;
 int controlsInit = FALSE;
@@ -54,7 +54,7 @@ __declspec( dllexport ) int LibNumberClasses()
 __declspec( dllexport ) ClassDesc* LibClassDesc(int i)
 {
 	switch(i) {
-		case 0: return GetiGaiaMeshExporterDesc();
+		case 0: return getIE3DexporterDescription();
 		default: return 0;
 	}
 }

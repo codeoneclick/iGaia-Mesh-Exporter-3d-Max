@@ -72,6 +72,14 @@ bool CMesh::bindMesh(void)
 	for(size_t k = 0; k < gameObjectsCount; ++k)
 	{
 		IGameObject *gameObject = m_gameObjects.at(k);
+		IGameNode *gameNode = m_gameNodes.at(k);
+		std::string gameNodeName = gameNode->GetName();
+		std::cout<<"name: "<<gameNodeName<<std::endl;
+		IGameNode *parentGameNode = gameNode->GetNodeParent();
+		IGameObject *parentGameObject = parentGameNode != nullptr ? parentGameNode->GetIGameObject() : nullptr;
+		std::string parentGameNodeName = parentGameNode != nullptr ? parentGameNode->GetName() : "";
+		std::cout<<"parent name: "<<parentGameNodeName<<std::endl;
+
 		if(gameObject->GetIGameType() != IGameMesh::IGAME_MESH)
 		{
 			continue;
@@ -102,7 +110,6 @@ bool CMesh::bindMesh(void)
 				Point3 tangent = gameMesh->GetTangent(indexId);
 				vertex.m_tangent = glm::vec3(tangent.x, tangent.y, tangent.z);
 				vertex.m_indexId = indexId;
-				vertex.m_uniqueId = indexId + indicesOffset;
 
 				DWORD texcoordIndexes[3];
 				Point3 texcoord;
@@ -130,7 +137,8 @@ bool CMesh::bindMesh(void)
 				{
 					m_indexData[3 * i + j + indicesOffset] = m_vertexData.size();
 
-					if(gameSkin != nullptr &&  IGameSkin::IGAME_SKIN == gameSkin->GetSkinType())
+					if(gameSkin != nullptr && 
+						IGameSkin::IGAME_SKIN == gameSkin->GetSkinType())
 					{
 						i32 numWeights = gameSkin->GetNumberOfBones(vertex.m_indexId);
 
@@ -152,6 +160,15 @@ bool CMesh::bindMesh(void)
 							boneWeight.m_boneId = boneId;
 							vertex.m_weights.push_back(boneWeight);
 						}
+					} else if(parentGameObject != nullptr && 
+						parentGameObject->GetIGameType() == IGameMesh::IGAME_BONE)
+					{
+						i32 boneId =  m_skeleton->getBoneId(parentGameNode);
+						SBoneWeight boneWeight;
+						boneWeight.m_weight = 1.0;
+						boneWeight.m_boneId = boneId;
+						vertex.m_weights.push_back(boneWeight);
+						std::cout<<"parent is bone"<<std::endl;
 					}
 					if(vertex.m_weights.size() > 4)
 					{
@@ -183,12 +200,13 @@ bool CMesh::bindMesh(void)
 void CMesh::serialize(const std::string& filename)
 {
 	std::ofstream stream;
-	std::string meshFilename = filename + "_mesh";
-	stream.open(meshFilename, std::ios::binary | std::ios::out | std::ios::trunc);
+	stream.open(filename, std::ios::binary | std::ios::out | std::ios::trunc);
 	if(!stream.is_open())
 	{
 		return;
 	}
+
+#if defined (__MESH__)
 
 	i32 numVertexes = m_vertexData.size();
 	i32 numIndexes = m_indexData.size();
@@ -217,23 +235,14 @@ void CMesh::serialize(const std::string& filename)
 	{
 		stream.write((char*)&m_indexData[i], sizeof(ui16));
 	}
-	stream.close();
 
-	std::string skeletonFilename = filename + "_sk";
-	stream.open(skeletonFilename, std::ios::binary | std::ios::out | std::ios::trunc);
-	if(!stream.is_open() || m_skeleton == nullptr)
-	{
-		return;
-	}
 	m_skeleton->serialize(stream);
 	stream.close();
 
-	std::string sequenceFilename = filename + "_anim";
-	stream.open(sequenceFilename, std::ios::binary | std::ios::out | std::ios::trunc);
-	if(!stream.is_open() || m_sequence == nullptr)
-	{
-		return;
-	}
+#elif defined(__ANIMATION__)
+
 	m_sequence->serialize(stream);
 	stream.close();
+
+#endif
 }
